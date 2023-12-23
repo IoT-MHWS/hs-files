@@ -1,0 +1,14 @@
+services:
+  eureka:
+    image: ${HS_EUREKA_IMAGE:-mhws/hs-eureka:latest}
+    ports:
+      - ${HS_EUREKA_PORT:-8761}:8761
+
+  hs-files:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - ${HS_USER_PORT:-8767}:8767
+    environment:
+      HS_FILES_EUREKA_URI: http://eureka:8761/eureka
