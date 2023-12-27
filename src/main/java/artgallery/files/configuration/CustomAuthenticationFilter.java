@@ -1,10 +1,6 @@
-package artgallery.cms.configuration;
+package artgallery.files.configuration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,10 +9,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.AuthenticationFilter;
-
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomAuthenticationFilter extends AuthenticationFilter {
 
@@ -62,8 +61,8 @@ public class CustomAuthenticationFilter extends AuthenticationFilter {
         roles = new ArrayList<>();
       }
       return roles.stream()
-        .map(SimpleGrantedAuthority::new)
-        .collect(Collectors.toList());
+          .map(SimpleGrantedAuthority::new)
+          .collect(Collectors.toList());
     }
   }
 }

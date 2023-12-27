@@ -1,4 +1,4 @@
-package artgallery.cms.configuration;
+package artgallery.files.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,11 +21,11 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfiguration {
 
   private final String[] WHITE_LIST_URLS = {
-    "/api-docs",
-    "/api-docs/**",
-    "/swagger-ui",
-    "/swagger-ui/**",
-    "/webjars/**"
+      "/api-docs",
+      "/api-docs/**",
+      "/swagger-ui",
+      "/swagger-ui/**",
+      "/webjars/**"
   };
 
   private final AuthenticationProvider authenticationProvider;
@@ -33,15 +33,15 @@ public class SecurityConfiguration {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
     http
-      .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-      .authorizeHttpRequests((req) -> req
-        .requestMatchers(WHITE_LIST_URLS).permitAll()
-        .anyRequest().authenticated())
-      .csrf(AbstractHttpConfigurer::disable)
-      .formLogin(AbstractHttpConfigurer::disable)
-      .authenticationProvider(authenticationProvider)
-      .addFilterAt(customAuthenticationFilter(authenticationManager), BasicAuthenticationFilter.class)
-      .exceptionHandling(configurer -> configurer.authenticationEntryPoint(customAuthenticationEntryPoint()));
+        .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+        .authorizeHttpRequests((req) -> req
+            .requestMatchers(WHITE_LIST_URLS).permitAll()
+            .anyRequest().authenticated())
+        .csrf(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .authenticationProvider(authenticationProvider)
+        .addFilterAt(customAuthenticationFilter(authenticationManager), BasicAuthenticationFilter.class)
+        .exceptionHandling(configurer -> configurer.authenticationEntryPoint(customAuthenticationEntryPoint()));
 
     return http.build();
   }

@@ -1,4 +1,4 @@
-package artgallery.cms.configuration;
+package artgallery.files.configuration;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
