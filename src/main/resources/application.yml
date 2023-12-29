@@ -8,3 +8,8 @@ spring:
       enabled: false
   profiles:
     active: local
+
+app:
+  fs:
+    paintings:
+      path: ${HS_FILES_VOLUME:./pictures}
