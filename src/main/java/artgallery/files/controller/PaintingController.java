@@ -24,7 +24,7 @@ public class PaintingController {
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
-  @GetMapping(value = "/{id}", produces = {"image/png", "image/jpeg"})
+  @GetMapping(value = "/{id}")
   public ResponseEntity<?> getPainting(@PathVariable long id, @RequestParam(defaultValue = "raw") String type) throws IOException {
     var imageModel = switch (type) {
       case "raw" -> paintingService.getPaintingRaw(id);
