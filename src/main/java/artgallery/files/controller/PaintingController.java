@@ -32,8 +32,8 @@ public class PaintingController {
       default -> throw new RuntimeException("unknown type");
     };
     return ResponseEntity.status(HttpStatus.OK)
-        .contentType(MediaType.parseMediaType(imageModel.mimeType()))
-        .body(imageModel.bytes());
+      .contentType(MediaType.parseMediaType(imageModel.mimeType()))
+      .body(imageModel.bytes());
   }
 
   @DeleteMapping(value = "/{id}")

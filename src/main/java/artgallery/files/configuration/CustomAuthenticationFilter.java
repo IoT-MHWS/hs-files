@@ -61,8 +61,8 @@ public class CustomAuthenticationFilter extends AuthenticationFilter {
         roles = new ArrayList<>();
       }
       return roles.stream()
-          .map(SimpleGrantedAuthority::new)
-          .collect(Collectors.toList());
+        .map(SimpleGrantedAuthority::new)
+        .collect(Collectors.toList());
     }
   }
 }

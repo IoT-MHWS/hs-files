@@ -81,7 +81,7 @@ public class FsPaintingRepository implements PaintingRepository {
 
   private void deletePainting(long id, FuncPaintingPath funcNameToPath) throws IOException {
     try (var files = Files.find(funcNameToPath.apply(), 1, (p, attr) ->
-        p.toFile().getName().matches(String.format("%d\\..*", id)))) {
+      p.toFile().getName().matches(String.format("%d\\..*", id)))) {
       files.forEach(file -> {
         try {
           FsUtil.delete(file);
