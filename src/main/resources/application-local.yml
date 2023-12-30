@@ -12,6 +12,15 @@ springdoc:
   swagger-ui:
     path: "/swagger-ui"
 
+app:
+  paintings:
+    repository:
+      fs:
+        mount: ${HS_FILES_PAINTINGS_VOLUME:./pictures}
+        locations:
+          raw: "/raw"
+          compressed: "/compressed"
+
 #logging:
 #  level:
 #    org:
