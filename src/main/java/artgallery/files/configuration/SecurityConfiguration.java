@@ -28,6 +28,12 @@ public class SecurityConfiguration {
     "/webjars/**"
   };
 
+  private final String[] WEBSOCKET_URLS = {
+    "/ws",
+    "/queue/**",
+    "/app/**"
+  };
+
   private final AuthenticationProvider authenticationProvider;
 
   @Bean
@@ -36,6 +42,7 @@ public class SecurityConfiguration {
       .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
       .authorizeHttpRequests((req) -> req
         .requestMatchers(WHITE_LIST_URLS).permitAll()
+        .requestMatchers(WEBSOCKET_URLS).permitAll()
         .anyRequest().authenticated())
       .csrf(AbstractHttpConfigurer::disable)
       .formLogin(AbstractHttpConfigurer::disable)

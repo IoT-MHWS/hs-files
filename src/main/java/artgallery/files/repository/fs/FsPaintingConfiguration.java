@@ -20,6 +20,10 @@ public class FsPaintingConfiguration {
   @Value("${app.paintings.repository.fs.locations.compressed}")
   private String locationCompressed;
 
+  public Path getPaintingMount() {
+    return Paths.get(paintingsMount);
+  }
+
   public Path getPaintingPathRaw() throws IOException {
     Path path = Paths.get(paintingsMount, locationRaw);
     Files.createDirectories(path);
