@@ -1,7 +1,6 @@
 package artgallery.files.repository.fs;
 
 import artgallery.files.model.ImageModel;
-import artgallery.files.repository.PaintingRepository;
 import artgallery.files.util.ImageMimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,38 +12,37 @@ import java.nio.file.Paths;
 
 @Repository
 @RequiredArgsConstructor
-public class FsPaintingRepository implements PaintingRepository {
+public class FsPaintingRepository {
 
   private final FsPaintingConfiguration configuration;
 
-  @Override
   public ImageModel getPaintingRaw(long id) throws IOException {
     return this.getPainting(id, configuration::getPaintingPathRaw);
   }
 
-  @Override
-  public void putPaintingRaw(ImageModel imageModel) throws IOException {
-    this.putPainting(imageModel, configuration::getPaintingPathRaw);
+  public ImageModel putPaintingRaw(ImageModel imageModel) throws IOException {
+    return this.putPainting(imageModel, configuration::getPaintingPathRaw);
   }
 
-  @Override
   public void deletePaintingRaw(long id) throws IOException {
     this.deletePainting(id, configuration::getPaintingPathRaw);
   }
 
-  @Override
   public ImageModel getPaintingCompressed(long id) throws IOException {
     return this.getPainting(id, configuration::getPaintingPathCompressed);
   }
 
-  @Override
-  public void putPaintingCompressed(ImageModel imageModel) throws IOException {
-    this.putPainting(imageModel, configuration::getPaintingPathCompressed);
-  }
-
-  @Override
   public void deletePaintingCompressed(long id) throws IOException {
     this.deletePainting(id, configuration::getPaintingPathCompressed);
+  }
+
+  public Path getPaintingCompressedPath(ImageModel raw) throws IOException {
+    var suffix = raw.path().toString().substring(configuration.getPaintingPathRaw().toString().length());
+    return getPaintingPath(configuration.getPaintingPathCompressed(), suffix);
+  }
+
+  public Path getPaintingMount() {
+    return configuration.getPaintingMount();
   }
 
   @FunctionalInterface
@@ -58,7 +56,7 @@ public class FsPaintingRepository implements PaintingRepository {
       try {
         String name = getPaintingName(id, extension);
         Path path = this.getPaintingPath(funcNameToPath.apply(), name);
-        return new ImageModel(id, FsUtil.get(path), ImageMimeUtil.extensionToMime(extension));
+        return new ImageModel(id, FsUtil.get(path), ImageMimeUtil.extensionToMime(extension), path);
       } catch (IOException ex) {
         lastException = ex;
       }
@@ -69,7 +67,7 @@ public class FsPaintingRepository implements PaintingRepository {
     return null;
   }
 
-  private void putPainting(ImageModel imageModel, FuncPaintingPath funcNameToPath) throws IOException {
+  private ImageModel putPainting(ImageModel imageModel, FuncPaintingPath funcNameToPath) throws IOException {
     // delete before insertion
     this.deletePainting(imageModel.id(), funcNameToPath);
 
@@ -77,11 +75,12 @@ public class FsPaintingRepository implements PaintingRepository {
     String name = getPaintingName(imageModel.id(), extension);
     Path path = this.getPaintingPath(funcNameToPath.apply(), name);
     FsUtil.put(path, imageModel.bytes());
+    return new ImageModel(imageModel.id(), imageModel.bytes(), imageModel.mimeType(), path);
   }
 
   private void deletePainting(long id, FuncPaintingPath funcNameToPath) throws IOException {
     try (var files = Files.find(funcNameToPath.apply(), 1, (p, attr) ->
-        p.toFile().getName().matches(String.format("%d\\..*", id)))) {
+      p.toFile().getName().matches(String.format("%d\\..*", id)))) {
       files.forEach(file -> {
         try {
           FsUtil.delete(file);

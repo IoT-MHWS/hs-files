@@ -20,11 +20,11 @@ public class PaintingController {
   @PutMapping(value = "/{id}", consumes = {"image/png", "image/jpeg"})
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> putPaintingRaw(@PathVariable long id, @RequestBody byte[] bytes, @RequestHeader("Content-Type") String contentType) throws IOException {
-    paintingService.putPaintingRaw(new ImageModel(id, bytes, contentType));
+    paintingService.putPaintingRaw(new ImageModel(id, bytes, contentType, null));
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
-  @GetMapping(value = "/{id}", produces = {"image/png", "image/jpeg"})
+  @GetMapping(value = "/{id}")
   public ResponseEntity<?> getPainting(@PathVariable long id, @RequestParam(defaultValue = "raw") String type) throws IOException {
     var imageModel = switch (type) {
       case "raw" -> paintingService.getPaintingRaw(id);
@@ -32,8 +32,8 @@ public class PaintingController {
       default -> throw new RuntimeException("unknown type");
     };
     return ResponseEntity.status(HttpStatus.OK)
-        .contentType(MediaType.parseMediaType(imageModel.mimeType()))
-        .body(imageModel.bytes());
+      .contentType(MediaType.parseMediaType(imageModel.mimeType()))
+      .body(imageModel.bytes());
   }
 
   @DeleteMapping(value = "/{id}")

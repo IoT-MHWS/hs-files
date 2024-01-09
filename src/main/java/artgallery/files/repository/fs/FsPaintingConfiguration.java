@@ -11,20 +11,27 @@ import java.nio.file.Paths;
 @Configuration
 public class FsPaintingConfiguration {
 
-  @Value("${app.fs.paintings.path}")
-  private String paintingsPath;
+  @Value("${app.paintings.repository.fs.mount}")
+  private String paintingsMount;
 
-  private static final String SUBDIR_RAW = "raw";
-  private static final String SUBDIR_COMPRESSED = "compressed";
+  @Value("${app.paintings.repository.fs.locations.raw}")
+  private String locationRaw;
+
+  @Value("${app.paintings.repository.fs.locations.compressed}")
+  private String locationCompressed;
+
+  public Path getPaintingMount() {
+    return Paths.get(paintingsMount);
+  }
 
   public Path getPaintingPathRaw() throws IOException {
-    Path path = Paths.get(paintingsPath, SUBDIR_RAW);
+    Path path = Paths.get(paintingsMount, locationRaw);
     Files.createDirectories(path);
     return path;
   }
 
   public Path getPaintingPathCompressed() throws IOException {
-    Path path = Paths.get(paintingsPath, SUBDIR_COMPRESSED);
+    Path path = Paths.get(paintingsMount, locationCompressed);
     Files.createDirectories(path);
     return path;
   }

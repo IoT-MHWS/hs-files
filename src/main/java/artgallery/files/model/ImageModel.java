@@ -1,4 +1,6 @@
 package artgallery.files.model;
 
-public record ImageModel(long id, byte[] bytes, String mimeType) {
+import java.nio.file.Path;
+
+public record ImageModel(long id, byte[] bytes, String mimeType, Path path) {
 }
