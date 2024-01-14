@@ -38,5 +38,6 @@ public class PaintingWSController {
     headerAccessor.setLeaveMutable(true);
 
     simpMessagingTemplate.convertAndSendToUser(sessionId, "/queue/pictures.compression", request, headerAccessor.getMessageHeaders());
+    log.info("sent request to /queue/pictures.compression with sessionId=" + sessionId);
   }
 }
