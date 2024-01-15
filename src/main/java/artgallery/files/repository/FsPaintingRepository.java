@@ -96,11 +96,11 @@ public class FsPaintingRepository implements PaintingRepository {
     }
   }
 
-  public Path getPath(Path path, String name) throws IOException {
+  private Path getPath(Path path, String name) throws IOException {
     return Paths.get(path.toString(), name);
   }
 
-  public String getName(long id, String extension) {
+  private String getName(long id, String extension) {
     return id + "." + extension;
   }
 
