@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 
 @Getter
-public class PaintingStatusRepository {
+public class PaintingStatusSessionRepository {
   private final ArrayList<String> activeSessions = new ArrayList<>();
   private int idx = 0;
 

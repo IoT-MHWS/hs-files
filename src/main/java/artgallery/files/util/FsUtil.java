@@ -1,4 +1,4 @@
-package artgallery.files.repository.fs;
+package artgallery.files.util;
 
 import java.io.IOException;
 import java.nio.file.Files;
