@@ -18,7 +18,6 @@ public class CustomServerConfiguration {
   @Bean
   public AuthenticationProvider authenticationProvider() {
     return new AuthenticationProvider() {
-
       @Override
       public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         return authentication;

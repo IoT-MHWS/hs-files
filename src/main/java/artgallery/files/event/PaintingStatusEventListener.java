@@ -10,17 +10,17 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @RequiredArgsConstructor
 @Slf4j
 public class PaintingStatusEventListener {
-  private final PaintingStatusRepository paintingStatusRepository;
+  private final PaintingStatusSessionRepository paintingStatusSessionRepository;
 
   @EventListener
   private void handleSessionConnected(SessionConnectedEvent event) {
     SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
     log.info("connected: " + headers.getSessionId());
-    paintingStatusRepository.add(headers.getSessionId());
+    paintingStatusSessionRepository.add(headers.getSessionId());
   }
 
   @EventListener
   private void handleSessionDisconnect(SessionDisconnectEvent event) {
-    paintingStatusRepository.remove(event.getSessionId());
+    paintingStatusSessionRepository.remove(event.getSessionId());
   }
 }

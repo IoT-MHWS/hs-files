@@ -19,7 +19,6 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfiguration {
-
   private final String[] WHITE_LIST_URLS = {
     "/api-docs",
     "/api-docs/**",

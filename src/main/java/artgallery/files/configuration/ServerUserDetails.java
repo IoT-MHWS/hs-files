@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 public class ServerUserDetails implements UserDetails {
-
   @Getter
   private final Long id;
 
