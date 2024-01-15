@@ -21,6 +21,13 @@ app:
           raw: "/raw"
           compressed: "/compressed"
 
+spring:
+  kafka:
+    bootstrap-servers: ${HS_FILES_KAFKA_URI:http://localhost:9092}
+    consumer:
+      max-poll-records: 100
+      auto-offset-reset: earliest
+
 #logging:
 #  level:
 #    org:
