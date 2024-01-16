@@ -1,6 +1,7 @@
 package artgallery.files.service;
 
 import artgallery.files.model.ImageCompressionResponse;
+import artgallery.files.model.cache.ImageData;
 import artgallery.files.model.cache.ImageFilesMetadata;
 import artgallery.files.repository.PaintingCacheRepository;
 import artgallery.files.repository.PaintingCompressionFacade;
@@ -48,7 +49,7 @@ public class GenericPaintingService implements PaintingService {
 
     paintingCacheRepository.setPaintingFileMetadata(id, new ImageFilesMetadata(
       false,
-      paintingFileMetadata == null ? paintingRepository.hasPaintingCompressed(id) : paintingFileMetadata.hasCompressed()
+      this.hasCompressed(id, paintingFileMetadata)
     ));
   }
 
@@ -61,17 +62,36 @@ public class GenericPaintingService implements PaintingService {
     var paintingFileMetadata = paintingCacheRepository.getPaintingFileMetadata(id);
 
     paintingCacheRepository.setPaintingFileMetadata(id, new ImageFilesMetadata(
-      paintingFileMetadata == null ? paintingRepository.hasPaintingRaw(id) : paintingFileMetadata.hasRaw(),
+      this.hasRaw(id, paintingFileMetadata),
       false
     ));
   }
 
+  // if not success -> delete inserted raw image (SAGA)
   public void processCompressionResponse(ImageCompressionResponse response) throws IOException {
     long id = response.getId();
-    var paintingFileMetadata = paintingCacheRepository.getPaintingFileMetadata(id);
-    paintingCacheRepository.setPaintingFileMetadata(id, new ImageFilesMetadata(
-      paintingFileMetadata == null ? paintingRepository.hasPaintingRaw(id) : paintingFileMetadata.hasRaw(),
-      response.isResult()
-    ));
+    ImageFilesMetadata metadata;
+    if (!response.isResult()) {
+      paintingRepository.deletePaintingRaw(id);
+      metadata = new ImageFilesMetadata(false, false);
+    } else {
+      var paintingFileMetadata = paintingCacheRepository.getPaintingFileMetadata(id);
+      metadata = new ImageFilesMetadata(this.hasRaw(id, paintingFileMetadata), true);
+    }
+    paintingCacheRepository.setPaintingFileMetadata(id, metadata);
+  }
+
+  private boolean hasRaw(long id, ImageFilesMetadata metadata) throws IOException {
+    if (metadata == null) {
+      return paintingRepository.hasPaintingRaw(id);
+    }
+    return metadata.hasRaw();
+  }
+
+  private boolean hasCompressed(long id, ImageFilesMetadata metadata) throws IOException {
+    if (metadata == null) {
+      return paintingRepository.hasPaintingCompressed(id);
+    }
+    return metadata.hasCompressed();
   }
 }
