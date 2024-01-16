@@ -29,12 +29,11 @@ public class GenericPaintingService implements PaintingService {
     .build();
 
   public void putPaintingRaw(ImageModel image) throws IOException {
+    paintingCacheRepository.deletePaintingFileMetadata(image.id());
     var model = paintingRepository.putPaintingRaw(image);
-    paintingCacheRepository.setPaintingFileMetadata(image.id(), new ImageFilesMetadata(true, false));
     // send request to worker for compression
     var sourcePath = paintingRepository.getImageLocationRaw(model);
     var destinationPath = paintingRepository.getImageLocationCompressedFromRaw(model);
-
     var request = new ImageCompressionRequest<>(image.id(), sourcePath, destinationPath, model.mimeType(), compressionParams);
     paintingCompressionFacade.sendCompressionRequest(request);
   }
@@ -44,54 +43,45 @@ public class GenericPaintingService implements PaintingService {
   }
 
   public void deletePaintingRaw(long id) throws IOException {
+    paintingCacheRepository.deletePaintingFileMetadata(id);
     paintingRepository.deletePaintingRaw(id);
-    var paintingFileMetadata = paintingCacheRepository.getPaintingFileMetadata(id);
-
-    paintingCacheRepository.setPaintingFileMetadata(id, new ImageFilesMetadata(
-      false,
-      this.hasCompressed(id, paintingFileMetadata)
-    ));
   }
 
   public ImageModel getPaintingCompressed(long id) throws IOException {
-    return paintingRepository.getPaintingCompressed(id);
+    var cache = paintingCacheRepository.getPaintingFileCompressed(id);
+    if (cache == null) {
+      var compressedPainting = paintingRepository.getPaintingCompressed(id);
+      paintingCacheRepository.setPaintingFileCompressed(id, new ImageData(compressedPainting.bytes(), compressedPainting.mimeType()));
+      return compressedPainting;
+    }
+    return new ImageModel(id, cache.data(), cache.mimeType(), null);
   }
 
   public void deletePaintingCompressed(long id) throws IOException {
+    paintingCacheRepository.deletePaintingFileCompressed(id);
+    paintingCacheRepository.deletePaintingFileMetadata(id);
     paintingRepository.deletePaintingCompressed(id);
-    var paintingFileMetadata = paintingCacheRepository.getPaintingFileMetadata(id);
-
-    paintingCacheRepository.setPaintingFileMetadata(id, new ImageFilesMetadata(
-      this.hasRaw(id, paintingFileMetadata),
-      false
-    ));
   }
 
   // if not success -> delete inserted raw image (SAGA)
   public void processCompressionResponse(ImageCompressionResponse response) throws IOException {
     long id = response.getId();
-    ImageFilesMetadata metadata;
+    paintingCacheRepository.deletePaintingFileCompressed(id);
+    paintingCacheRepository.deletePaintingFileMetadata(id);
     if (!response.isResult()) {
       paintingRepository.deletePaintingRaw(id);
-      metadata = new ImageFilesMetadata(false, false);
-    } else {
-      var paintingFileMetadata = paintingCacheRepository.getPaintingFileMetadata(id);
-      metadata = new ImageFilesMetadata(this.hasRaw(id, paintingFileMetadata), true);
     }
-    paintingCacheRepository.setPaintingFileMetadata(id, metadata);
   }
 
-  private boolean hasRaw(long id, ImageFilesMetadata metadata) throws IOException {
-    if (metadata == null) {
-      return paintingRepository.hasPaintingRaw(id);
+  public ImageFilesMetadata getPaintingFileMetadata(long id) throws IOException {
+    var cache = paintingCacheRepository.getPaintingFileMetadata(id);
+    if (cache == null) {
+      boolean hasRaw = paintingRepository.hasPaintingRaw(id);
+      boolean hasCompressed = paintingRepository.hasPaintingCompressed(id);
+      cache = new ImageFilesMetadata(hasRaw, hasCompressed);
+      paintingCacheRepository.setPaintingFileMetadata(id, cache);
     }
-    return metadata.hasRaw();
+    return cache;
   }
 
-  private boolean hasCompressed(long id, ImageFilesMetadata metadata) throws IOException {
-    if (metadata == null) {
-      return paintingRepository.hasPaintingCompressed(id);
-    }
-    return metadata.hasCompressed();
-  }
 }

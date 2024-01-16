@@ -10,9 +10,13 @@ public interface PaintingCacheRepository {
 
   void setPaintingFileCompressed(Long id, ImageData data);
 
+  void deletePaintingFileCompressed(Long id);
+
   ImageFilesMetadata getPaintingFileMetadata(Long id);
 
   void setPaintingFileMetadata(Long id, ImageFilesMetadata data);
+
+  void deletePaintingFileMetadata(Long id);
 
   PaintingMetadata getPaintingMetadata(Long id);
 }

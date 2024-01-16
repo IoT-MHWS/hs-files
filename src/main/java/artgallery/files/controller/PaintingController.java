@@ -47,4 +47,9 @@ public class PaintingController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  @GetMapping(value = "/{id}/metadata")
+  public ResponseEntity<?> getPaintingFilesMetadata(@PathVariable long id) throws IOException {
+    return ResponseEntity.status(HttpStatus.OK).body(paintingService.getPaintingFileMetadata(id));
+  }
+
 }

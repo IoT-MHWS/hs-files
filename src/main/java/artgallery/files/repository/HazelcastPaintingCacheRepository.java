@@ -19,22 +19,37 @@ public class HazelcastPaintingCacheRepository implements PaintingCacheRepository
     this.paintingsMetadataMap = hazelcastClient.getMap(configuration.paintingsMetadataMap);
   }
 
+  @Override
   public ImageData getPaintingFileCompressed(Long id) {
     return paintingsFilesCompressedMap.get(id);
   }
 
+  @Override
   public void setPaintingFileCompressed(Long id, ImageData data) {
     paintingsFilesCompressedMap.set(id, data);
   }
 
+  @Override
+  public void deletePaintingFileCompressed(Long id) {
+    paintingsFilesCompressedMap.delete(id);
+  }
+
+  @Override
   public ImageFilesMetadata getPaintingFileMetadata(Long id) {
     return paintingsFilesMetadataMap.get(id);
   }
 
+  @Override
   public void setPaintingFileMetadata(Long id, ImageFilesMetadata data) {
     paintingsFilesMetadataMap.set(id, data);
   }
 
+  @Override
+  public void deletePaintingFileMetadata(Long id) {
+    paintingsFilesMetadataMap.delete(id);
+  }
+
+  @Override
   public PaintingMetadata getPaintingMetadata(Long id) {
     return paintingsMetadataMap.get(id);
   }

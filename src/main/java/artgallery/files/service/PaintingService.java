@@ -2,6 +2,7 @@ package artgallery.files.service;
 
 import artgallery.files.model.ImageCompressionResponse;
 import artgallery.files.model.ImageModel;
+import artgallery.files.model.cache.ImageFilesMetadata;
 
 import java.io.IOException;
 
@@ -17,4 +18,6 @@ public interface PaintingService {
   void deletePaintingCompressed(long id) throws IOException;
 
   void processCompressionResponse(ImageCompressionResponse response) throws IOException;
+
+  ImageFilesMetadata getPaintingFileMetadata(long id) throws IOException;
 }
