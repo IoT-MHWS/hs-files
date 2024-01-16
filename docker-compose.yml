@@ -31,5 +31,19 @@ services:
     environment:
       HS_FILES_EUREKA_URI: http://eureka:8761/eureka
 
+  hazelcast:
+    image: hazelcast/hazelcast:5.3-slim
+    environment:
+      JAVA_OPTS: "-Dhazelcast.config=/opt/hazelcast/config_ext/hazelcast.yaml"
+    ports:
+      - ${HS_HAZELCAST_PORT:-5701}:5701
+    volumes:
+      - ./services/hazelcast:/opt/hazelcast/config_ext
+
+  hazelcast-management-center:
+    image: hazelcast/management-center:latest
+    ports:
+      - 8080:8080
+
 volumes:
   kafka_data:

@@ -21,4 +21,8 @@ public class FsUtil {
     Files.delete(path);
   }
 
+  public static boolean has(Path path) {
+    return Files.exists(path);
+  }
+
 }

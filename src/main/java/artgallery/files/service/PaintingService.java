@@ -1,5 +1,6 @@
 package artgallery.files.service;
 
+import artgallery.files.model.ImageCompressionResponse;
 import artgallery.files.model.ImageModel;
 
 import java.io.IOException;
@@ -14,4 +15,6 @@ public interface PaintingService {
   ImageModel getPaintingCompressed(long id) throws IOException;
 
   void deletePaintingCompressed(long id) throws IOException;
+
+  void processCompressionResponse(ImageCompressionResponse response) throws IOException;
 }

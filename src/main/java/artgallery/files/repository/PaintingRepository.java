@@ -12,9 +12,13 @@ public interface PaintingRepository {
 
   void deletePaintingRaw(long id) throws IOException;
 
+  boolean hasPaintingRaw(long id) throws IOException;
+
   ImageModel getPaintingCompressed(long id) throws IOException;
 
   void deletePaintingCompressed(long id) throws IOException;
+
+  boolean hasPaintingCompressed(long id) throws IOException;
 
   ImageLocation getImageLocationRaw(ImageModel raw) throws IOException;
 
