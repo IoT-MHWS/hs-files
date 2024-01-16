@@ -30,7 +30,7 @@ app:
 
 spring:
   kafka:
-    bootstrap-servers: ${HS_FILES_KAFKA_URI:http://localhost:9092}
+    bootstrap-servers: ${HS_FILES_KAFKA_URI:localhost:9092}
     consumer:
       max-poll-records: 100
       auto-offset-reset: earliest
