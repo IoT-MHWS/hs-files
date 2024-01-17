@@ -55,4 +55,12 @@ public class ServerUserDetails implements UserDetails {
     return true;
   }
 
+  public String getIdAsString() {
+    return String.valueOf(id);
+  }
+
+  public String getAuthoritiesAsString() {
+    return String.join(",", authorities.stream().map(GrantedAuthority::toString).toList());
+  }
+
 }

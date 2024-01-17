@@ -7,7 +7,7 @@ services:
   kafka:
     image: docker.io/bitnami/kafka:3.6
     ports:
-      - "9092:9092"
+      - "9092:9094"
     volumes:
       - "kafka_data:/bitnami"
     environment:
@@ -16,13 +16,14 @@ services:
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       # Listeners
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://:9092,EXTERNAL://localhost:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
 
   hs-files:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: dockerfile
@@ -30,6 +31,73 @@ services:
       - ${HS_USER_PORT:-8767}:8767
     environment:
       HS_FILES_EUREKA_URI: http://eureka:8761/eureka
+      HS_FILES_PAINTINGS_VOLUME: /pictures
+      HS_FILES_HAZELCAST_ADDRESSES: hazelcast:5701
+      HS_FILES_KAFKA_URI: kafka:9092
+    volumes:
+      - paintings:/paintings
+
+  hazelcast:
+    image: hazelcast/hazelcast:5.3-slim
+    environment:
+      JAVA_OPTS: "-Dhazelcast.config=/opt/hazelcast/config_ext/hazelcast.yaml"
+    ports:
+      - ${HS_HAZELCAST_PORT:-5701}:5701
+    volumes:
+      - ./services/hazelcast:/opt/hazelcast/config_ext
+
+  hazelcast-management-center:
+    image: hazelcast/management-center:latest
+    ports:
+      - 8080:8080
+
+  postgres:
+    image: postgres:16.0-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-example}
+      HS_CMS_POSTGRES_DATABASE: db_cms
+      HS_CMS_POSTGRES_USERNAME: ${HS_CMS_POSTGRES_USERNAME:-hs}
+      HS_CMS_POSTGRES_PASSWORD: ${HS_CMS_POSTGRES_PASSWORD:-example}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./services/postgres/entrypoint/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d db_cms" ]
+      start_period: 60s
+      interval: 10s
+      timeout: 60s
+      retries: 5
+
+  liquibase-cms:
+    build:
+      context: services/liquibase
+      dockerfile: cms.dockerfile
+      args:
+        BUNDLER_IMAGE: ${HS_CMS_IMAGE:-mhws/hs-cms:latest}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      LIQUIBASE_COMMAND_USERNAME: ${HS_CMS_POSTGRES_USERNAME:-hs}
+      LIQUIBASE_COMMAND_PASSWORD: ${HS_CMS_POSTGRES_PASSWORD:-example}
+      LIQUIBASE_COMMAND_URL : jdbc:postgresql://postgres:5432/db_cms
+    command: --defaults-file=/liquibase/liquibase.properties update
+
+  hs-cms:
+    image: ${HS_CMS_IMAGE:-mhws/hs-cms:latest}
+    ports:
+      - 8764:8764
+    environment:
+      HS_CMS_EUREKA_URI: http://eureka:8761/eureka
+      HS_CMS_DATASOURCE_HOST: postgres
+      HS_CMS_DATASOURCE_PORT: 5432
+      HS_CMS_DATASOURCE_DATABASE: db_cms
+      HS_CMS_DATASOURCE_USERNAME: hs
+      HS_CMS_DATASOURCE_PASSWORD: example
 
 volumes:
   kafka_data:
+  postgres-data:
+  paintings:
+

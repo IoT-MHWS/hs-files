@@ -30,12 +30,22 @@ public class FsPaintingRepository implements PaintingRepository {
     this.deletePainting(id, configuration::getFullPaintingPathRaw);
   }
 
+  @Override
+  public boolean hasPaintingRaw(long id) throws IOException {
+    return this.hasPainting(id, configuration::getFullPaintingPathRaw);
+  }
+
   public ImageModel getPaintingCompressed(long id) throws IOException {
     return this.getPainting(id, configuration::getFullPaintingPathCompressed);
   }
 
   public void deletePaintingCompressed(long id) throws IOException {
     this.deletePainting(id, configuration::getFullPaintingPathCompressed);
+  }
+
+  @Override
+  public boolean hasPaintingCompressed(long id) throws IOException {
+    return this.hasPainting(id, configuration::getFullPaintingPathCompressed);
   }
 
   /*
@@ -53,7 +63,7 @@ public class FsPaintingRepository implements PaintingRepository {
 
   @FunctionalInterface
   private interface FuncPaintingPath {
-    Path apply() throws IOException;
+    Path apply();
   }
 
   private ImageModel getPainting(long id, FuncPaintingPath funcNameToFullPath) throws IOException {
@@ -93,6 +103,13 @@ public class FsPaintingRepository implements PaintingRepository {
         } catch (IOException ignored) {
         }
       });
+    }
+  }
+
+  private boolean hasPainting(long id, FuncPaintingPath funcNameToFullPath) throws IOException {
+    try (var files = Files.find(funcNameToFullPath.apply(), 1, (p, attr) ->
+      p.toFile().getName().matches(String.format("%d\\..*", id)))) {
+      return files.findAny().isPresent();
     }
   }
 
