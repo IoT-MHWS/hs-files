@@ -1,8 +1,10 @@
 package artgallery.files.service;
 
+import artgallery.files.configuration.ServerUserDetails;
 import artgallery.files.model.ImageCompressionResponse;
 import artgallery.files.model.cache.ImageData;
 import artgallery.files.model.cache.ImageFilesMetadata;
+import artgallery.files.repository.CMSFeignClient;
 import artgallery.files.repository.PaintingCacheRepository;
 import artgallery.files.repository.PaintingCompressionFacade;
 import artgallery.files.repository.PaintingRepository;
@@ -10,17 +12,20 @@ import artgallery.files.model.CompressionParams;
 import artgallery.files.model.ImageCompressionRequest;
 import artgallery.files.model.ImageModel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GenericPaintingService implements PaintingService {
 
   private final PaintingRepository paintingRepository;
   private final PaintingCompressionFacade paintingCompressionFacade;
   private final PaintingCacheRepository paintingCacheRepository;
+  private final CMSFeignClient cmsFeignClient;
 
   private final CompressionParams compressionParams = CompressionParams.builder()
     .width(256)
@@ -28,7 +33,12 @@ public class GenericPaintingService implements PaintingService {
     .keepAspectRatio(true)
     .build();
 
-  public void putPaintingRaw(ImageModel image) throws IOException {
+  public void putPaintingRaw(ImageModel image, ServerUserDetails userDetails) throws IOException {
+    var cache = paintingCacheRepository.getPaintingMetadata(image.id());
+    if (cache == null) {
+      cmsFeignClient.getPaintingById(image.id(),
+        userDetails.getIdAsString(), userDetails.getUsername(), userDetails.getAuthoritiesAsString());
+    }
     paintingCacheRepository.deletePaintingFileMetadata(image.id());
     var model = paintingRepository.putPaintingRaw(image);
     // send request to worker for compression

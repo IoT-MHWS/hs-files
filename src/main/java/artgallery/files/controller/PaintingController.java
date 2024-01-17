@@ -1,5 +1,6 @@
 package artgallery.files.controller;
 
+import artgallery.files.configuration.ServerUserDetails;
 import artgallery.files.model.ImageModel;
 import artgallery.files.service.PaintingService;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -19,8 +21,8 @@ public class PaintingController {
 
   @PutMapping(value = "/{id}", consumes = {"image/png", "image/jpeg"})
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> putPaintingRaw(@PathVariable long id, @RequestBody byte[] bytes, @RequestHeader("Content-Type") String contentType) throws IOException {
-    paintingService.putPaintingRaw(new ImageModel(id, bytes, contentType, null));
+  public ResponseEntity<?> putPaintingRaw(@PathVariable long id, @RequestBody byte[] bytes, @RequestHeader("Content-Type") String contentType,  @AuthenticationPrincipal ServerUserDetails userDetails) throws IOException {
+    paintingService.putPaintingRaw(new ImageModel(id, bytes, contentType, null), userDetails);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
