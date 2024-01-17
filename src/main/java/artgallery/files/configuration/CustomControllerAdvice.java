@@ -5,6 +5,7 @@ import com.hazelcast.client.HazelcastClientOfflineException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,7 +21,9 @@ public class CustomControllerAdvice extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler({NoSuchFileException.class})
   public ResponseEntity<?> handleNoSuchFileException(NoSuchFileException ex) {
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(HttpStatus.NOT_FOUND, "element not found"));
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(new ApiError(HttpStatus.NOT_FOUND, "element not found"));
   }
 
   @ExceptionHandler({
@@ -33,13 +36,17 @@ public class CustomControllerAdvice extends ResponseEntityExceptionHandler {
       status = HttpStatus.SERVICE_UNAVAILABLE;
     }
     return ResponseEntity.status(status)
+      .contentType(MediaType.APPLICATION_JSON)
       .body(ex.contentUTF8());
   }
 
   @ExceptionHandler({SocketException.class, HazelcastClientOfflineException.class})
   public ResponseEntity<?> socketException(Exception ex) {
     log.error(ex.getMessage());
-    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+    return ResponseEntity
+      .status(HttpStatus.SERVICE_UNAVAILABLE)
+      .contentType(MediaType.APPLICATION_JSON)
+      .build();
   }
 
 }
