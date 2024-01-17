@@ -1,16 +1,16 @@
 package artgallery.files.service;
 
 import artgallery.files.configuration.ServerUserDetails;
+import artgallery.files.model.CompressionParams;
+import artgallery.files.model.ImageCompressionRequest;
 import artgallery.files.model.ImageCompressionResponse;
+import artgallery.files.model.ImageModel;
 import artgallery.files.model.cache.ImageData;
 import artgallery.files.model.cache.ImageFilesMetadata;
 import artgallery.files.repository.CMSFeignClient;
 import artgallery.files.repository.PaintingCacheRepository;
 import artgallery.files.repository.PaintingCompressionFacade;
 import artgallery.files.repository.PaintingRepository;
-import artgallery.files.model.CompressionParams;
-import artgallery.files.model.ImageCompressionRequest;
-import artgallery.files.model.ImageModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

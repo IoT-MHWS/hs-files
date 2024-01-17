@@ -21,7 +21,7 @@ public class PaintingController {
 
   @PutMapping(value = "/{id}", consumes = {"image/png", "image/jpeg"})
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> putPaintingRaw(@PathVariable long id, @RequestBody byte[] bytes, @RequestHeader("Content-Type") String contentType,  @AuthenticationPrincipal ServerUserDetails userDetails) throws IOException {
+  public ResponseEntity<?> putPaintingRaw(@PathVariable long id, @RequestBody byte[] bytes, @RequestHeader("Content-Type") String contentType, @AuthenticationPrincipal ServerUserDetails userDetails) throws IOException {
     paintingService.putPaintingRaw(new ImageModel(id, bytes, contentType, null), userDetails);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
