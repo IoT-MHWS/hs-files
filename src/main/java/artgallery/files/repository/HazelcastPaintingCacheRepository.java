@@ -3,20 +3,40 @@ package artgallery.files.repository;
 import artgallery.files.model.cache.ImageData;
 import artgallery.files.model.cache.ImageFilesMetadata;
 import artgallery.files.model.cache.PaintingMetadata;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.util.ClientStateListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public class HazelcastPaintingCacheRepository implements PaintingCacheRepository {
-  private final IMap<Long, ImageData> paintingsFilesCompressedMap;
-  private final IMap<Long, ImageFilesMetadata> paintingsFilesMetadataMap;
-  private final IMap<Long, PaintingMetadata> paintingsMetadataMap;
+import java.util.concurrent.CompletableFuture;
 
-  public HazelcastPaintingCacheRepository(HazelcastInstance hazelcastClient, HazelcastPaintingCacheConfiguration configuration) {
-    this.paintingsFilesCompressedMap = hazelcastClient.getMap(configuration.paintingsFilesCompressedMap);
-    this.paintingsFilesMetadataMap = hazelcastClient.getMap(configuration.paintingsFilesMetadataMap);
-    this.paintingsMetadataMap = hazelcastClient.getMap(configuration.paintingsMetadataMap);
+@Repository
+@Slf4j
+public class HazelcastPaintingCacheRepository implements PaintingCacheRepository {
+  private final HazelcastInstance hazelcastClient;
+  private IMap<Long, ImageData> paintingsFilesCompressedMap;
+  private IMap<Long, ImageFilesMetadata> paintingsFilesMetadataMap;
+  private IMap<Long, PaintingMetadata> paintingsMetadataMap;
+
+  public HazelcastPaintingCacheRepository(ClientConfig config, HazelcastPaintingCacheConfiguration configuration) {
+    ClientStateListener clientStateListener = new ClientStateListener(config);
+    this.hazelcastClient = HazelcastClient.newHazelcastClient(config);
+
+    CompletableFuture.runAsync(() -> {
+      try {
+        if (clientStateListener.awaitConnected()) {
+          paintingsFilesCompressedMap = hazelcastClient.getMap(configuration.paintingsFilesCompressedMap);
+          paintingsFilesMetadataMap = hazelcastClient.getMap(configuration.paintingsFilesMetadataMap);
+          paintingsMetadataMap = hazelcastClient.getMap(configuration.paintingsMetadataMap);
+          log.info("hazelcast maps initialized");
+        }
+      } catch (InterruptedException ex){
+        ex.printStackTrace();
+      }
+    });
   }
 
   @Override
