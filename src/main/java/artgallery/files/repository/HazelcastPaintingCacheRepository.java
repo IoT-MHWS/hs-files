@@ -34,7 +34,8 @@ public class HazelcastPaintingCacheRepository implements PaintingCacheRepository
           log.info("hazelcast maps initialized");
         }
       } catch (InterruptedException ex){
-        ex.printStackTrace();
+        log.error(ex.getMessage());
+        Thread.currentThread().interrupt();
       }
     });
   }
