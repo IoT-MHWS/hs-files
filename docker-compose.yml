@@ -23,7 +23,6 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
 
   hs-files:
-    profiles: ["app"]
     build:
       context: .
       dockerfile: dockerfile
@@ -31,9 +30,26 @@ services:
       - ${HS_USER_PORT:-8767}:8767
     environment:
       HS_FILES_EUREKA_URI: http://eureka:8761/eureka
-      HS_FILES_PAINTINGS_VOLUME: /pictures
+      HS_FILES_PAINTINGS_VOLUME: /paintings
       HS_FILES_HAZELCAST_ADDRESSES: hazelcast:5701
       HS_FILES_KAFKA_URI: kafka:9092
+    volumes:
+      - paintings:/paintings
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent localhost:8767/ws | grep WebSocket || exit 1" ]
+      start_period: 1200s
+      interval: 10s
+      timeout: 30s
+      retries: 5
+
+  hs-files-compressor:
+    image: ${HS_FILES_COMPRESSOR_IMAGE:-mhws/hs-files-compressor:latest}
+    depends_on:
+      hs-files:
+        condition: service_healthy
+    environment:
+      HS_FILES_PAINTINGS_VOLUME: /paintings
+      HS_FILES_CLIENT_SERVER_URLS: ws://hs-files:8767/ws
     volumes:
       - paintings:/paintings
 
